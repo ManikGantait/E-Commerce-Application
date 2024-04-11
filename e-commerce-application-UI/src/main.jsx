@@ -7,6 +7,12 @@ import Login from './Public/Login.jsx'
 import Register from './Public/Register';
 import Home from './Public/Home.jsx'
 
+const user={
+  "userId":"123",
+  "username":"abc",
+  
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
