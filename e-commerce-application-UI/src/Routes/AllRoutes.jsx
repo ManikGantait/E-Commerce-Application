@@ -8,12 +8,13 @@ import SellerDashBord from '../Private/Seller/SellerDashBord';
 import AddAddress from '../Private/Common/AddAddress';
 import EditProfile from '../Private/Common/EditProfile';
 import Wishlist from '../Private/Customer/Wishlist';
-
-
+import Home from '../Public/Home';
+import Login from '../Public/Login';
+import Register from '../Public/Register';
 const AllRoutes = () => {
  const user={
     role:"CUSTOMER",
-    authenticated: true,
+    authenticated: false,
     accessExpiration:3600,
     refershExpiration:129600
  }
