@@ -1,29 +1,53 @@
-import React from 'react'
+import React from "react";
+import { Link } from "react-router-dom";
 
 const Login = () => {
-  return (
-   <section className='flex justify-center'>
-    <div className='bg-blue'>
 
-    </div>
-     <div className="flex justify-center items-center h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded shadow-md w-96">
-        <h2 className="text-2xl font-semibold mb-4">Login to Flipkart</h2>
-        <form method='post'>
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-600">Email</label>
-            <input type="email" id="email" name="email" className="mt-1 p-2 w-full border rounded-md" />
+ 
+    const adjustLevel=()=>{
+      document.getElementById("myLabel").classList.add('text-xs','text-gray-400','left-15','pb-15');
+    }
+
+  return (
+    <section className="mt-8 flex justify-center">
+      <div className="flex-col justify-end   bg-blue-700 h-[500px] w-80">
+        <div className=" flex-col h-[300px]">
+          <div className="mt-8 px pl-10 text-white text-3xl">Login</div>
+          <div className="mt-8 pl-10 text-gray-400 text-lg">
+            Get access to your Orders, Wishlist and Recommendations
           </div>
-          <div className="mb-6">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-600">Password</label>
-            <input type="password" id="password" name="password" className="mt-1 p-2 w-full border rounded-md" />
-          </div>
-          <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">Login</button>
-        </form>
+        </div>
+
+        <div className="">
+          <img
+            className=" pl-12"
+            src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/login_img_c4a81e.png"
+          />
+        </div>
       </div>
-    </div>
-   </section>
-  )
-}
+      <div className=" h-[500px] border-2 border-red-100 w-[500px]">
+        <div className="relative mt-8 pl-3 pr-2 ">
+          <form action="post" className=''>          
+            <input id='myInput'onFocus={adjustLevel} className="p-2 border-b-2  w-full outline-none focus:border-blue-700" type="text" />
+            <label id='myLabel' className="absolute left-20 text-lg		">Enter Email</label>
+            <div className='mt-8 text-xs'>By continuing, you agree to Flipkart's Terms of Use and Privacy Policy.</div>
+            <div className='mt-10 w-full h-12 bg-orange-500'>
+              <Link className=" flex justify-center w-full h-12">
+                <span className='mt-3  w-28 whitespace-nowrap   text-white font-bold'>Sign In</span>
+              </Link>
+            </div>
+            {/* <div className='mt-4 w-full h-12 bg-white shadow-lg'>
+              <Link className=" flex justify-center w-full h-12">
+                <span className='text-blue-500 mt-3 whitespace-nowrap font-bold'>Existing User? Login</span>
+              </Link>
+            </div> */}
+
+          </form>
+        </div>
+        </div>
+      
+    </section>
+  );
+};
 
 export default Login
