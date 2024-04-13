@@ -11,6 +11,8 @@ import Wishlist from '../Private/Customer/Wishlist';
 import Home from '../Public/Home';
 import Login from '../Public/Login';
 import Register from '../Public/Register';
+import OTPVerification from '../Public/OTPVerification';
+
 const AllRoutes = () => {
  const user={
     role:"CUSTOMER",
@@ -23,6 +25,8 @@ let routes=[];
 
 if(authenticated)
 {
+    // Private Routes
+
     routes.push(
         <Route key={'/addaddress'} path='/addaddress' element={ <AddAddress />}/>,
         <Route key={'/addaddress'}path='/editprofile' element={ <EditProfile />}/>
@@ -30,6 +34,7 @@ if(authenticated)
 
     if(role==="CUSTOMER") 
     {
+        // Private Customer Routes
         routes.push(             
             <Route key={'/wishlist'} path='/wishlist' element={ <Wishlist />}/>,
             <Route key={'/explore'} path='/explore' element={ <Explore />}/>,
@@ -38,6 +43,7 @@ if(authenticated)
     }
     else if(role==="SELLER")
     {
+        // Private Seler Routes
         routes.push(
             <Route key={'/add-product'} path='/add-product' element={ <AddProduct />}/>,
             <Route key={'/seller-dashbord'} path='/seller-dashbord' element={ <SellerDashBord />}/>
@@ -46,12 +52,14 @@ if(authenticated)
 }
 else{
 
+    // Public Routes
     routes.push(
         
         <Route key={'/'} path='/' element={ <Home/>}/>,
         <Route key={'/login'} path='/login' element={ <Login />}/>,
         <Route key={'/register'} path='/register' element={ <Register />}/>, 
-        <Route key={'/explore'} path='/explore' element={ <Explore />}/>,      
+        <Route key={'/explore'} path='/explore' element={ <Explore />}/>, 
+        <Route key={'/otpverification'} path='/otperification' element={ <OTPVerification />}/>,           
         
     ) ; 
 

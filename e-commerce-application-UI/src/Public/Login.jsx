@@ -1,6 +1,13 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Login = () => {
+
+ 
+    const adjustLevel=()=>{
+      document.getElementById("myLabel").classList.add('text-xs','text-gray-400','left-15','pb-15');
+    }
+
   return (
     <section className="mt-8 flex justify-center">
       <div className="flex-col justify-end   bg-blue-700 h-[500px] w-80">
@@ -18,17 +25,29 @@ const Login = () => {
           />
         </div>
       </div>
-      <div className="h-[500px] bg-red-200 w-[500px]">
-        <div className="bg-green-200 mt-8 pl-8">
-          <form action="post">
-            <input className="p-2 border-none	  w-full outline-none	" type="text" />
-            <label className="absolute translate-y-(50%) origin-left 	left-25	">Enter Email/Mobile number</label>
+      <div className=" h-[500px] border-2 border-red-100 w-[500px]">
+        <div className="relative mt-8 pl-3 pr-2 ">
+          <form action="post" className=''>          
+            <input id='myInput'onFocus={adjustLevel} className="p-2 border-b-2  w-full outline-none focus:border-blue-700" type="text" />
+            <label id='myLabel' className="absolute left-20 text-lg		">Enter Email</label>
+            <div className='mt-8 text-xs'>By continuing, you agree to Flipkart's Terms of Use and Privacy Policy.</div>
+            <div className='mt-10 w-full h-12 bg-orange-500'>
+              <Link className=" flex justify-center w-full h-12">
+                <span className='mt-3  w-28 whitespace-nowrap   text-white font-bold'>Sign In</span>
+              </Link>
+            </div>
+            {/* <div className='mt-4 w-full h-12 bg-white shadow-lg'>
+              <Link className=" flex justify-center w-full h-12">
+                <span className='text-blue-500 mt-3 whitespace-nowrap font-bold'>Existing User? Login</span>
+              </Link>
+            </div> */}
+
           </form>
         </div>
+        </div>
       
-      </div>
     </section>
   );
 };
 
-export default Login;
+export default Login
