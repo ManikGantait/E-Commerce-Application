@@ -26,10 +26,9 @@ const Login = () => {
         </div>
       </div>
       <div className=" h-[500px] border-2 border-red-100 w-[500px]">
-        <div className="relative mt-8 pl-3 pr-2 ">
+        <div className=" mt-8 pl-3 pr-2 ">
           <form action="post" className=''>          
-            <input id='myInput'onFocus={adjustLevel} className="p-2 border-b-2  w-full outline-none focus:border-blue-700" type="text" />
-            <label id='myLabel' className="absolute left-20 text-lg		">Enter Email</label>
+            <input placeholder="Enter Email" id='myInput'onFocus={adjustLevel} className="p-2  border-b-2  w-full outline-none focus:border-blue-700" type="text" />
             <div className='mt-8 text-xs'>By continuing, you agree to Flipkart's Terms of Use and Privacy Policy.</div>
             <div className='mt-10 w-full h-12 bg-orange-500'>
               <Link className=" flex justify-center w-full h-12">
