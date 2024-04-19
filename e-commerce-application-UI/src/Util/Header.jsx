@@ -88,6 +88,16 @@ const Header = () => {
       </div>
     );
   }
+  const DropDownLink=({icon,title,spanElement,onClick})=>
+  {
+    return(
+      <div>
+         <Link onClick={onClick} className="flex  px-4 py-2 text-gray-800 hover:bg-gray-200" title={title}>{icon}{spanElement}</Link>
+      </div>
+
+    )
+  }
+
 
   return (
     <section>
@@ -125,7 +135,11 @@ const Header = () => {
 
                  {isOpenLogin && (
                           <div className="absolute top-full left-0 bg-white shadow-md rounded  py-1 w-64"  onMouseEnter={handleMouseEnterBoth} onMouseLeave={handleMouseLeavBoth}> 
-                          <Link onClick={()=>window.location.href="/register"} className="block px-4 py-2 text-gray-800 hover:bg-gray-200">New Customer ? <span className="text-blue-600 pl-8">Sign Up</span></Link>
+                         
+                          <Link onClick={()=>window.location.href="/customer/register"} className="block px-4 py-2 text-gray-800 hover:bg-gray-200">New Customer ? <span className="text-blue-600 pl-8">Sign Up</span></Link>
+                          {/* <DropDownLink icon={<VscAccount/>} title={["My Profile"]} spanElement={<span className='pl-7'>My Profile</span>} onClick={window.location.href="#"}/> */}
+                         
+                         
                           <Link href="#" className="flex  px-4 py-2 text-gray-800 hover:bg-gray-200" title="My Profile"><VscAccount/><span className="pl-7">My Profile</span></Link>
                           <Link href="#" className="flex  px-4 py-2 text-gray-800 hover:bg-gray-200" title="Flipkart Plus Zone"><TiPlusOutline/><span className="pl-7">Flipkart Plus Zone</span></Link>
                           <Link href="#" className="flex  px-4 py-2 text-gray-800 hover:bg-gray-200" title="Orders"><BsBoxSeam/><span className="pl-7">Orders</span></Link>
@@ -143,11 +157,11 @@ const Header = () => {
                 <HeaderLink icon={[<AiOutlineShoppingCart />]} logoname={["Orders"]} onClick={()=>window.location.href="#"}/>
                 :authenticated && role==="CUSTOMER"?
                 <div className="flex items-center">
-                  <HeaderLink icon={[<AiOutlineShoppingCart />]} logoname={["Cart"]} onClick={()=>window.location.href="./cart"}/>
-                  <HeaderLink icon={[<IoIosHeartEmpty />]} logoname={["WishList"]} onClick={()=>window.location.href="./wishlist"}/>
+                  <HeaderLink icon={[<AiOutlineShoppingCart />]} logoname={["Cart"]} onClick={()=>window.location.href="/cart"}/>
+                  <HeaderLink icon={[<IoIosHeartEmpty />]} logoname={["WishList"]} onClick={()=>window.location.href="/wishlist"}/>
                 </div>:
                 !authenticated &&
-                <HeaderLink icon={[<FiGift/>]} logoname={["Become a Seller"]} onClick={()=>window.location.href="/login"}/>
+                <HeaderLink icon={[<FiGift/>]} logoname={["Become a Seller"]} onClick={()=>window.location.href="/seller/register"}/>
               }
               </div>
               <div  className="flex justify-between relative">
