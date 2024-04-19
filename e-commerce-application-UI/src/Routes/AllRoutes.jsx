@@ -43,7 +43,7 @@ if(authenticated)
     }
     else if(role==="SELLER")
     {
-        // Private Seler Routes
+        // Private Seller Routes
         routes.push(
             <Route key={'/add-product'} path='/add-product' element={ <AddProduct />}/>,
             <Route key={'/seller-dashbord'} path='/seller-dashbord' element={ <SellerDashBord />}/>
@@ -57,9 +57,10 @@ else{
         
         <Route key={'/'} path='/' element={ <Home/>}/>,
         <Route key={'/login'} path='/login' element={ <Login />}/>,
-        <Route key={'/register'} path='/register' element={ <Register />}/>, 
+        <Route key={'/customer/register'} path='/customer/register' element={ <Register role={"CUSTOMER"} />}/>, 
+        <Route key={'/seller/register'} path='/seller/register' element={ <Register role={"SELLER"} />}/>, 
         <Route key={'/explore'} path='/explore' element={ <Explore />}/>, 
-        <Route key={'/otpverification'} path='/otperification' element={ <OTPVerification />}/>,           
+        <Route key={'/otpverification'} path='/otpverification' element={ <OTPVerification />}/>,           
         
     ) ; 
 
