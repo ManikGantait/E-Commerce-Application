@@ -7,9 +7,12 @@ import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.lang.Maps;
 import io.jsonwebtoken.security.Keys;
 @Service
 public class JwtService {
@@ -24,10 +27,28 @@ public class JwtService {
 	private long refreshExpiry;
 
 	
-	private String generateToken(String username,long expiration)
+	public String generateAccessToken(String username,String role)
+	{
+		return  generateToken(username,role, accessExpiry);
+	}
+	public String generateRefreshToken(String username,String role)
+	{
+		return generateToken(username,role, refreshExpiry);
+	}
+	
+	public String getUsername(String token)
+	{
+		return parseClaims(token).getSubject();
+	}
+	public String getUserRole(String token)
+	{
+		return parseClaims(token).get("role", String.class);
+	}
+	
+	private String generateToken(String username,String role,long expiration)
 	{
 		return Jwts.builder()
-				.setClaims(new HashMap<>())
+				.setClaims(Maps.of("role", role).build())
 				.setSubject(username)
 				.setIssuedAt(new Date(System.currentTimeMillis()))
 				.setExpiration(new Date(System.currentTimeMillis()+expiration))
@@ -36,20 +57,22 @@ public class JwtService {
 	}
 	
 	private Key getSignatureKey()
-	{
-		
+	{	
 		return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
 	}
 	
+	private Claims parseClaims(String token)
+	{
+		//validation
+		//JwtException<-JwtExpirationException
+		
+		return Jwts.parserBuilder().setSigningKey(getSignatureKey()).build().parseClaimsJws(token).getBody();
+	}
+	
+	
 
-	public String generateAccessToken(String username)
-	{
-		return  generateToken(username, accessExpiry);
-	}
-	public String generateRefreshToken(String username)
-	{
-		return generateToken(username, refreshExpiry);
-	}
+	
+	
 	
 }
 

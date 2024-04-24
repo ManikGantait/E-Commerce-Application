@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.retail.ecom.exception.UserNotFoundByEmailException;
+import com.retail.ecom.exception.UserNotFoundByUsernameException;
 import com.retail.ecom.repository.UserRepository;
 
 import lombok.AllArgsConstructor;
@@ -18,8 +19,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		// TODO Auto-generated method stub
-		return userRepository.findByUsername(username).map(CustomUserDetails::new)
-													.orElseThrow(()-> new UserNotFoundByEmailException("user Not Found "));
+		return userRepository.findByUsername(username)
+									.map(CustomUserDetails::new)
+									.orElseThrow(()-> new UserNotFoundByUsernameException("user Not Found "));
 		
 	}
 
