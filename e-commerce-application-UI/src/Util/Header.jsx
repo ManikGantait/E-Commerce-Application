@@ -17,19 +17,16 @@ import { HiArrowDownTray } from "react-icons/hi2";
 import { HiArrowTrendingUp } from "react-icons/hi2";
 import Login from "../Public/Login";
 import { IoIosHeartEmpty } from "react-icons/io";
+import { useAuth } from "../auth/AuthProvider";
 
 
-const user={
-  userId:123,
-  username:"jack",
-  role:"CUSTOMER",
-  authenticated: false,
-  accessExpiration:3600,
-  refershExpiration:129600
-}
-const{username,role, authenticated}=user;
+
 
 const Header = () => {
+
+  const {user}=useAuth();
+  console.log(user)
+  const{username,role, authenticated}=user;
   const [isOpenLogin, setIsOpenLogin] = useState(false);
   const [isOpenNotifications, setIsOpenSeler] = useState(false);
   const [isDown, setIsDown]=useState(true);

@@ -12,16 +12,13 @@ import Home from '../Public/Home';
 import Login from '../Public/Login';
 import Register from '../Public/Register';
 import OTPVerification from '../Public/OTPVerification';
+import { useAuth } from '../auth/AuthProvider';
 
 const AllRoutes = () => {
- const user={
-    role:"CUSTOMER",
-    authenticated: false,
-    accessExpiration:3600,
-    refershExpiration:129600
- }
-const{role, authenticated}=user;
-let routes=[];
+
+    const {user}=useAuth();
+    const{role, authenticated}=user;
+    let routes=[];
 
 if(authenticated)
 {
