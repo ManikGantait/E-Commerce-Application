@@ -26,11 +26,11 @@ const OTPVerification = () => {
     try {
       // Send registration request to the backend server
 
-      const response = await  axios.post('http://localhost:8080/api/v1/register', OtpData, {  headers: {'Content-Type': 'application/json'  } });
+      const response = await  axios.post('http://localhost:8080/api/v1/verify-email', OtpData, {  headers: {'Content-Type': 'application/json'  } });
       console.log(response.status)
       console.log(response.status==="202")
       console.log(response.status==="200")
-      if(response.ok)
+      if(response.status===201)
      {      
       //  alert(response.data.message);
        navigate('/login')

@@ -197,8 +197,9 @@ public class UserServiceImlp implements UserService {
 
 	@Override
 	public ResponseEntity<ResponseStructure<AuthResponse>> userLogin(AuthRequest authRequest) {
-		
-		String username=authRequest.getUsername().split("@gmial.com")[0];
+	
+		String username=authRequest.getUsername().split("@gmail.com")[0];
+		System.out.println(username);
 		Authentication authenticate = authenticationManager
 		.authenticate(
 				new UsernamePasswordAuthenticationToken(username, authRequest.getPassword())
@@ -268,7 +269,11 @@ public class UserServiceImlp implements UserService {
 	
 	private AuthResponse mapToAuthResponse(User user)
 	{
-		return AuthResponse.builder().accessExpiration(accessExpiration).refreshExpiration(refreshExpiration).userId(user.getUserId()).username(user.getUsername()).userRole(user.getUserRole()).build();
+		return AuthResponse.builder().accessExpiration(accessExpiration)
+				.refreshExpiration(refreshExpiration)
+				.userId(user.getUserId())
+				.username(user.getUsername())
+				.role(user.getUserRole()).build();
 	}
 
 	

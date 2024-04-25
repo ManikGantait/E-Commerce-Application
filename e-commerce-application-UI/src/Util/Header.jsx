@@ -24,9 +24,12 @@ import { useAuth } from "../auth/AuthProvider";
 
 const Header = () => {
 
+console.log("++++++++")
   const {user}=useAuth();
-  console.log(user)
+  
+  
   const{username,role, authenticated}=user;
+  console.log(username)
   const [isOpenLogin, setIsOpenLogin] = useState(false);
   const [isOpenNotifications, setIsOpenSeler] = useState(false);
   const [isDown, setIsDown]=useState(true);
@@ -85,15 +88,7 @@ const Header = () => {
       </div>
     );
   }
-  const DropDownLink=({icon,title,spanElement,onClick})=>
-  {
-    return(
-      <div>
-         <Link onClick={onClick} className="flex  px-4 py-2 text-gray-800 hover:bg-gray-200" title={title}>{icon}{spanElement}</Link>
-      </div>
-
-    )
-  }
+ 
 
 
   return (
