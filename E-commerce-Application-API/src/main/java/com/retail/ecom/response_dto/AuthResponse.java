@@ -14,7 +14,7 @@ public class AuthResponse {
 	private String username;
 	private long accessExpiration;
 	private long refreshExpiration;
-	private  UserRole userRole;
+	private  UserRole role;
 	
 
 }
