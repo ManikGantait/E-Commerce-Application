@@ -48,7 +48,7 @@ public class JwtFilter extends OncePerRequestFilter {
 		
 		if(accessToken!=null && refreshToken!=null )
 		{
-			if(accessTokenRepository.existsByTokenAndIsBlocked(accessTokenRepository,true)&& refreshTokenRepository.existsByTokenAndIsBlocked(refreshToken,true))
+			if(accessTokenRepository.existsByTokenAndIsBlocked(accessToken,true)&& refreshTokenRepository.existsByTokenAndIsBlocked(refreshToken,true))
 				throw new RuntimeException();
 			String username = jwtService.getUsername(accessToken);
 			String userRole=jwtService.getUserRole(accessToken);
