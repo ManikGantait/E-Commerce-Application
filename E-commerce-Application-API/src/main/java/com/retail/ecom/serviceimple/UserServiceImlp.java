@@ -1,9 +1,13 @@
 package com.retail.ecom.serviceimple;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Random;
 
+import org.checkerframework.checker.units.qual.h;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -33,6 +37,7 @@ import com.retail.ecom.exception.InvalidUserRoleSpecifiedException;
 import com.retail.ecom.exception.OTPExpiredException;
 import com.retail.ecom.exception.RegistrationSessionExpiredException;
 import com.retail.ecom.exception.UserAlreadyExistByEmailException;
+import com.retail.ecom.exception.UserAlreadyLogoutException;
 import com.retail.ecom.jwt.JwtService;
 import com.retail.ecom.mailservice.MailService;
 import com.retail.ecom.repository.AccessTokenRepository;
@@ -225,6 +230,78 @@ public class UserServiceImlp implements UserService {
 		
 	}
 
+	@Override
+	public ResponseEntity<SimpleResponseStructure>userLogout(String accessToken,
+			String refreshToken) {
+		if(accessToken==null&& refreshToken==null)
+			throw new UserAlreadyLogoutException("already logout");
+		refreshTokenRepository.findByToken(refreshToken).ifPresent(rt->{
+			rt.setBlocked(true);
+			System.out.println(rt);
+			refreshTokenRepository.save(rt);
+		});
+		
+		
+		accessTokenRepository.findByToken(accessToken).ifPresent(at->{
+			at.setBlocked(true);
+			System.out.println(at);
+			accessTokenRepository.save(at);
+		});
+		
+		
+		HttpHeaders headers=new HttpHeaders();
+		headers.add(HttpHeaders.SET_COOKIE, invalidCookie("at"));
+		headers.add(HttpHeaders.SET_COOKIE, invalidCookie("rt"));
+		System.err.println("++++++++++++++++++++++");
+		System.out.println(accessToken+"/"+refreshToken);
+		
+		return ResponseEntity.ok()
+				.headers(headers)
+				.body(simpleResponseStructure2.setStatus(HttpStatus.OK.value()).setMessage("Log out "));
+	}
+	
+	@Override
+	public ResponseEntity<ResponseStructure<AuthResponse>> refreshLogin(String accessToken, String refreshToken) {
+		
+		if(accessToken!=null)
+		{
+			accessTokenRepository.findByToken(accessToken).ifPresent(at->{
+				at.setBlocked(true);
+				accessTokenRepository.save(at);
+			});	
+		}
+		if(refreshToken==null)
+			throw new UserAlreadyLogoutException("require Login");
+		
+		Date date=jwtService.getIssueDate(refreshToken);
+		String username=jwtService.getUsername(refreshToken);
+		HttpHeaders headers=new HttpHeaders();
+		return userRepository.findByUsername(username).map(user->
+			{
+					if(date.before(new Date()))
+					{
+						generateRefreshToken(user, headers);
+						refreshTokenRepository.findByToken(refreshToken).ifPresent(rt->{
+							rt.setBlocked(true);
+							refreshTokenRepository.save(rt);
+						});
+					}
+					else
+						headers.add(HttpHeaders.SET_COOKIE, configuratinCookie("rt",refreshToken,refreshExpiration));
+					
+					generateAccessToken(user, headers);
+			return ResponseEntity.ok().headers(headers).body(new ResponseStructure<AuthResponse>()
+																.setStatusCode(HttpStatus.OK.value())
+																.setMessage("Refresh Successfull")
+																.setData(mapToAuthResponse(user)));
+		}).get();
+		
+		
+		
+	}
+
+
+	
 	private void generateRefreshToken(User user, HttpHeaders headers) {
 		String token=jwtService.generateRefreshToken(user.getUsername(),user.getUserRole().name());		
 		headers.add(HttpHeaders.SET_COOKIE, configuratinCookie("rt",token,refreshExpiration));
@@ -253,7 +330,7 @@ public class UserServiceImlp implements UserService {
 	private RefreshToken mapToRefreshToken(RefreshToken refreshToken, String token,User user)
 	{
 		refreshToken.setToken(token);
-		refreshToken.setExpiration(refreshExpiration);
+		refreshToken.setExpiration(mapToLocalDateTime(accessExpiration));
 		refreshToken.setBlocked(false);
 		refreshToken.setUser(user);
 		return refreshToken;
@@ -261,7 +338,7 @@ public class UserServiceImlp implements UserService {
 	private AccessToken mapToAccessToken(AccessToken accessToken, String token,User user)
 	{
 		accessToken.setToken(token);
-		accessToken.setExpiration(refreshExpiration);
+		accessToken.setExpiration(mapToLocalDateTime(refreshExpiration));
 		accessToken.setBlocked(false);
 		accessToken.setUser(user);
 		return accessToken;
@@ -275,7 +352,25 @@ public class UserServiceImlp implements UserService {
 				.username(user.getUsername())
 				.role(user.getUserRole()).build();
 	}
+	private String invalidCookie(String name) {
+		return ResponseCookie.from(name,"")
+				.domain("localhost")
+				.path("/")
+				.httpOnly(true)
+				.secure(false)
+				.maxAge(0)
+				.sameSite("Lax").build().toString();
+	}
+	private LocalDateTime mapToLocalDateTime(long milliseconds)
+	{
+		 Instant instant = Instant.ofEpochMilli(milliseconds);
+	     LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+	     return localDateTime;
+	}
 
+	
+	
+	
 	
 
 

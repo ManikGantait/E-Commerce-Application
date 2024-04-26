@@ -11,6 +11,7 @@ import com.retail.ecom.exception.InvalidUserRoleSpecifiedException;
 import com.retail.ecom.exception.OTPExpiredException;
 import com.retail.ecom.exception.RegistrationSessionExpiredException;
 import com.retail.ecom.exception.UserAlreadyExistByEmailException;
+import com.retail.ecom.exception.UserAlreadyLogoutException;
 
 import lombok.AllArgsConstructor;
 
@@ -58,6 +59,12 @@ public class ApllicationExceptionHandler {
 	public ResponseEntity<ErrorStructure>  invalidUserEmailSpecified( InvalidUserEmailSpecifiedException ex)
 	{
 		return ResponseEntity.badRequest().body(errorStructure(HttpStatus.BAD_REQUEST,"Invalid email",ex.getMessage()));
+	}
+	@ExceptionHandler
+	public ResponseEntity<ErrorStructure> userAlredyExist(UserAlreadyLogoutException ex)
+	{
+		return ResponseEntity.badRequest().body(errorStructure(HttpStatus.BAD_REQUEST,"User alredy logout",ex.getMessage()));
+				
 	}
 
 	

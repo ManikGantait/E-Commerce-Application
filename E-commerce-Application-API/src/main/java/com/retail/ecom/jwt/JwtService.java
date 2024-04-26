@@ -44,7 +44,10 @@ public class JwtService {
 	{
 		return parseClaims(token).get("role", String.class);
 	}
-	
+	public Date getIssueDate(String token)
+	{
+		return parseClaims(token).getIssuedAt();
+	}
 	private String generateToken(String username,String role,long expiration)
 	{
 		return Jwts.builder()
