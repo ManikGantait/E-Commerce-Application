@@ -1,10 +1,16 @@
 package com.retail.ecom.entity;
 
-import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.OneToOne;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-//@DiscriminatorValue("seller")
+@Getter
+@Setter
 public class Seller extends User{
+	
+	@OneToOne
+	private Address address;
 
 }
