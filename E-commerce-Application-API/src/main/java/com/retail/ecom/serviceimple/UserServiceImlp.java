@@ -43,6 +43,7 @@ import com.retail.ecom.mailservice.MailService;
 import com.retail.ecom.repository.AccessTokenRepository;
 import com.retail.ecom.repository.RefreshTokenRepository;
 import com.retail.ecom.repository.UserRepository;
+import com.retail.ecom.request_dto.AddressRequest;
 import com.retail.ecom.request_dto.AuthRequest;
 import com.retail.ecom.request_dto.OtpRequest;
 import com.retail.ecom.request_dto.UserRequestEntity;
@@ -100,64 +101,7 @@ public class UserServiceImlp implements UserService {
 	@Value("${myapp.jwt.refresh.expiration}")
 	private long refreshExpiration;
 
-	private <T extends User> T mapToChildEntity(UserRequestEntity userRequestEntity) {
-		UserRole  userRole=userRequestEntity.getUserRole();
-		User user;
-		switch (userRole) {
-		case SELLER ->	user=new Seller();
-		case CUSTOMER-> user=new Customer();
-		default-> throw new InvalidUserRoleSpecifiedException("User Role Not Specified");		
-		}
 		
-		user.setDisplayName(userRequestEntity.getName());
-		user.setEmail(userRequestEntity.getEmail());
-		user.setPassword(userRequestEntity.getPassword());
-		user.setUsername(userRequestEntity.getEmail().split("@gmail.com")[0]);
-		user.setUserRole(userRequestEntity.getUserRole());
-		user.setDeleted(false);
-		user.setEmailVerified(false);
-		return (T)user;
-	}
-	
-	private UserResponse mapToUserResponse(User user) {
-		return UserResponse.builder()
-		.displayName(user.getDisplayName())
-		.email(user.getEmail())
-		.userId(user.getUserId())
-		.username(user.getUsername())
-		.userRole(user.getUserRole())
-		.isEmailVerified(user.isEmailVerified())
-		.build();
-		
-	}	
-
-	private String generateOTP() {
-		return String.valueOf(new Random().nextInt(100000, 999999));
-	}
-	
-	
-
-	private void sendOTP(User user, String otp) throws MessagingException {
-		MessageModel model = MessageModel.builder()
-		.to(user.getEmail())
-		.subject("OTP Verification")
-		.text(
-				"<p> Hi, <br>"
-				+ "Thanks for your intrest in E-com,"
-				+ "Please Verify your mail Id using the OTP Given below.</p>"
-				+ "<br>"
-				+ "<h1>"+otp+"</h1>"
-				+ "<br>"
-				+ "Please ignore if its not you"
-				+ "<br>"
-				+ "with best regards"
-				+ "<h3>E-Com-Service</h3>"
-				+ "<img src='https://entrackr.com/storage/2020/03/flipkart-grocery-image.jpg'/>"			
-				).build();
-		
-		mailService.sendMailMessage(model);
-	}
-	
 	
 
 	@Override
@@ -240,15 +184,13 @@ public class UserServiceImlp implements UserService {
 			System.out.println(rt);
 			refreshTokenRepository.save(rt);
 		});
-		
-		
+				
 		accessTokenRepository.findByToken(accessToken).ifPresent(at->{
 			at.setBlocked(true);
 			System.out.println(at);
 			accessTokenRepository.save(at);
 		});
-		
-		
+				
 		HttpHeaders headers=new HttpHeaders();
 		headers.add(HttpHeaders.SET_COOKIE, invalidCookie("at"));
 		headers.add(HttpHeaders.SET_COOKIE, invalidCookie("rt"));
@@ -259,6 +201,8 @@ public class UserServiceImlp implements UserService {
 				.headers(headers)
 				.body(simpleResponseStructure2.setStatus(HttpStatus.OK.value()).setMessage("Log out "));
 	}
+	
+	
 	
 	@Override
 	public ResponseEntity<ResponseStructure<AuthResponse>> refreshLogin(String accessToken, String refreshToken) {
@@ -294,11 +238,72 @@ public class UserServiceImlp implements UserService {
 																.setStatusCode(HttpStatus.OK.value())
 																.setMessage("Refresh Successfull")
 																.setData(mapToAuthResponse(user)));
-		}).get();
-		
-		
+		}).get();	
 		
 	}
+	
+	
+	
+	private <T extends User> T mapToChildEntity(UserRequestEntity userRequestEntity) {
+		UserRole  userRole=userRequestEntity.getUserRole();
+		User user;
+		switch (userRole) {
+		case SELLER ->	user=new Seller();
+		case CUSTOMER-> user=new Customer();
+		default-> throw new InvalidUserRoleSpecifiedException("User Role Not Specified");		
+		}
+		
+		user.setDisplayName(userRequestEntity.getName());
+		user.setEmail(userRequestEntity.getEmail());
+		user.setPassword(userRequestEntity.getPassword());
+		user.setUsername(userRequestEntity.getEmail().split("@gmail.com")[0]);
+		user.setUserRole(userRequestEntity.getUserRole());
+		user.setDeleted(false);
+		user.setEmailVerified(false);
+		return (T)user;
+	}
+	
+	private UserResponse mapToUserResponse(User user) {
+		return UserResponse.builder()
+		.displayName(user.getDisplayName())
+		.email(user.getEmail())
+		.userId(user.getUserId())
+		.username(user.getUsername())
+		.userRole(user.getUserRole())
+		.isEmailVerified(user.isEmailVerified())
+		.build();
+		
+	}	
+
+	private String generateOTP() {
+		return String.valueOf(new Random().nextInt(100000, 999999));
+	}
+	
+	
+
+	private void sendOTP(User user, String otp) throws MessagingException {
+		MessageModel model = MessageModel.builder()
+		.to(user.getEmail())
+		.subject("OTP Verification")
+		.text(
+				"<p> Hi, <br>"
+				+ "Thanks for your intrest in E-com,"
+				+ "Please Verify your mail Id using the OTP Given below.</p>"
+				+ "<br>"
+				+ "<h1>"+otp+"</h1>"
+				+ "<br>"
+				+ "Please ignore if its not you"
+				+ "<br>"
+				+ "with best regards"
+				+ "<h3>E-Com-Service</h3>"
+				+ "<img src='https://entrackr.com/storage/2020/03/flipkart-grocery-image.jpg'/>"			
+				).build();
+		
+		mailService.sendMailMessage(model);
+	}
+
+	
+	
 
 
 	
@@ -369,9 +374,5 @@ public class UserServiceImlp implements UserService {
 	}
 
 	
-	
-	
-	
-
 
 }
