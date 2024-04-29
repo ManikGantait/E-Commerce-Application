@@ -1,9 +1,20 @@
 package com.retail.ecom.utility;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.retail.ecom.exception.InvalidOTPException;
 import com.retail.ecom.exception.InvalidUserEmailSpecifiedException;
@@ -17,12 +28,25 @@ import lombok.AllArgsConstructor;
 
 @RestControllerAdvice
 @AllArgsConstructor
-public class ApllicationExceptionHandler {
+public class ApllicationExceptionHandler extends ResponseEntityExceptionHandler {
 	
 	private ErrorStructure errorStructure;
 	
 	private ErrorStructure errorStructure(HttpStatus badRequest, String message, String rootCause) {
 		return errorStructure.setStatus(badRequest.value()).setRootCause(badRequest.value()).setMessage(message).setRootCause(rootCause);
+	}
+	
+	@Override
+	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+			HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+		List<ObjectError> errors = ex.getAllErrors();
+		Map<String,String> errorMap=new HashMap<>();
+		errors.forEach((error)->{
+			FieldError fieldError=(FieldError)error;
+			errorMap.put(fieldError.getField(), fieldError.getDefaultMessage());
+		});
+		return ResponseEntity.badRequest().body(new ErrorStructure().setMessage("Invalid Input").setRootCause(errorMap).setStatus(HttpStatus.BAD_REQUEST.value()));		
+		
 	}
 	
 	@ExceptionHandler
