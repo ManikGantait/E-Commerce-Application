@@ -51,9 +51,9 @@ public class UserController {
 //	}
 	
 	@PostMapping("/login")
-	public ResponseEntity<ResponseStructure<AuthResponse>> userLogin(@RequestBody AuthRequest authRequest)
+	public ResponseEntity<ResponseStructure<AuthResponse>> userLogin(@RequestBody AuthRequest authRequest ,@CookieValue(name = "at",required = false )String accessToken, @CookieValue(name = "rt",required = false)String refreshToken)
 	{
-		return service.userLogin(authRequest);
+		return service.userLogin(authRequest,accessToken,refreshToken);
 	}
 	@PostMapping("/logout")
 	public ResponseEntity<SimpleResponseStructure> userLogout(@CookieValue(name = "at", required = false)String accessToken, @CookieValue(name = "rt",required = false)String refreshToken )

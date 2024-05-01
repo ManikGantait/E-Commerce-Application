@@ -4,8 +4,11 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,21 +26,29 @@ import lombok.AllArgsConstructor;
 @RestController
 @AllArgsConstructor
 @RequestMapping("api/v1")
+@CrossOrigin(origins = "http://localhost:5173/",allowCredentials = "true" )
 public class AddressController {
 	
 	private AddressService addressService;
 	
 	@PostMapping("/address")
-	public ResponseEntity<ResponseStructure<AddressResponse>> addAddress(@RequestBody  AddressRequest addressRequest, @CookieValue(name = "at",required = false) String accessToken)
+	public ResponseEntity<ResponseStructure<AddressResponse>> addAddress(@RequestBody  AddressRequest addressRequest, @CookieValue(name = "rt",required = false) String refreshToken)
 	{
-		return addressService.addAddress(addressRequest, accessToken);
-		
+		System.out.println(refreshToken);
+		return addressService.addAddress(addressRequest, refreshToken);		
 	}
 	
 	@GetMapping("/address")
-	public ResponseEntity<ResponseStructure<List<AddressResponse>>> findAddressByUser(@CookieValue(name = "at",required = false)String accessToken)
+	public ResponseEntity<ResponseStructure<List<AddressResponse>>> findAddressByUser(@CookieValue(name = "rt",required = false)String accessToken)
 	{
+		System.out.println(accessToken);
 		return addressService.findAddressByUser(accessToken);
+	}
+	
+	@PutMapping("/address/{addressId}")
+	public ResponseEntity<ResponseStructure<AddressResponse>> updateAddress(@RequestBody AddressRequest addressRequest, @PathVariable int addressId)
+	{
+		return addressService.updateAddress(addressRequest,addressId);
 	}
 
 }
