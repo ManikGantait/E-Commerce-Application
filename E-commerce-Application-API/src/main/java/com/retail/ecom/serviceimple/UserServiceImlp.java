@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.Optional;
 import java.util.Random;
 
 import org.checkerframework.checker.units.qual.h;
@@ -37,6 +38,7 @@ import com.retail.ecom.exception.InvalidUserRoleSpecifiedException;
 import com.retail.ecom.exception.OTPExpiredException;
 import com.retail.ecom.exception.RegistrationSessionExpiredException;
 import com.retail.ecom.exception.UserAlreadyExistByEmailException;
+import com.retail.ecom.exception.UserAlreadyLoginException;
 import com.retail.ecom.exception.UserAlreadyLogoutException;
 import com.retail.ecom.jwt.JwtService;
 import com.retail.ecom.mailservice.MailService;
@@ -145,7 +147,8 @@ public class UserServiceImlp implements UserService {
 	}
 
 	@Override
-	public ResponseEntity<ResponseStructure<AuthResponse>> userLogin(AuthRequest authRequest) {
+	public ResponseEntity<ResponseStructure<AuthResponse>> userLogin(AuthRequest authRequest,String accessToken,
+			String refreshToekn) {
 	
 		String username=authRequest.getUsername().split("@gmail.com")[0];
 		System.out.println(username);
@@ -159,11 +162,16 @@ public class UserServiceImlp implements UserService {
 		
 		HttpHeaders headers=new HttpHeaders();
 		User user2= userRepository.findByUsername(username).map(user->{
+//			if(accessToken==null && refreshToekn!=null)
+//				throw new UserAlreadyLoginException("user already login");
 			generateAccessToken(user, headers);
 			generateRefreshToken(user, headers);
+				
 			return user;
 		}).get();
 		 
+		
+		
 		
 		return ResponseEntity.ok()
 		.headers(headers)

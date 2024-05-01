@@ -12,8 +12,11 @@ import com.retail.ecom.utility.SimpleResponseStructure;
 
 public interface AddressService {
 
-	public ResponseEntity<ResponseStructure<AddressResponse>> addAddress(AddressRequest addressRequest, String accessToken );
+	public ResponseEntity<ResponseStructure<AddressResponse>> addAddress(AddressRequest addressRequest, String refreshToken );
 
-	public ResponseEntity<ResponseStructure<List<AddressResponse>>> findAddressByUser(String accessToken); 
+	public ResponseEntity<ResponseStructure<List<AddressResponse>>> findAddressByUser(String accessToken);
+
+	public ResponseEntity<ResponseStructure<AddressResponse>> updateAddress(AddressRequest addressRequest,
+			int addressId); 
 
 }

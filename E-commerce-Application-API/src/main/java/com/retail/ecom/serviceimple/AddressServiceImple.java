@@ -19,6 +19,7 @@ import com.retail.ecom.entity.Customer;
 import com.retail.ecom.entity.Seller;
 import com.retail.ecom.entity.User;
 import com.retail.ecom.enums.UserRole;
+import com.retail.ecom.exception.AddressNotFoundByIdException;
 import com.retail.ecom.exception.AddressNotFoundByUserException;
 import com.retail.ecom.exception.AreadyHaveAddressException;
 import com.retail.ecom.jwt.JwtService;
@@ -47,9 +48,9 @@ public class AddressServiceImple implements AddressService {
 	private JwtService jwtService;
 
 	@Override
-	public ResponseEntity<ResponseStructure<AddressResponse>> addAddress(AddressRequest addressRequest, String accessToken) {
+	public ResponseEntity<ResponseStructure<AddressResponse>> addAddress(AddressRequest addressRequest, String refreshToken) {
 		
-		String username=jwtService.getUsername(accessToken);
+		String username=jwtService.getUsername(refreshToken);
 		
 		Optional<Address> optional = userRepository.findByUsername(username).map(user->{
 			System.out.println(username);
@@ -110,6 +111,18 @@ public class AddressServiceImple implements AddressService {
 			.setStatusCode(HttpStatus.OK.value()));	
 	}	
 	
+	@Override
+	public ResponseEntity<ResponseStructure<AddressResponse>> updateAddress(AddressRequest addressRequest,
+			int addressId) {
+		Address address2 = addressRepository.findById(addressId).map(address ->{
+			return addressRepository.save(mapToAddress(address, addressRequest));
+			
+		}).orElseThrow(()->new AddressNotFoundByIdException("address not found by id"));
+		return ResponseEntity.ok(new ResponseStructure<AddressResponse>()
+				.setData(mapToAddressResponse(address2)).setMessage("address updated")
+				.setStatusCode(HttpStatus.OK.value()));
+	}
+	
 	private List<AddressResponse> mapToAddressResponseList(AtomicReference<List<Address>> atomicReference)
 	{
 		List<Address> list = atomicReference.get();
@@ -169,6 +182,8 @@ public class AddressServiceImple implements AddressService {
 		.priority(contact.getPriority()).build();
 		
 	}
+
+	
 
 
 

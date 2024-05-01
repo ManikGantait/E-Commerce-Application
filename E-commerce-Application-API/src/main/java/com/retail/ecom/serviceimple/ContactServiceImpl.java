@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.retail.ecom.entity.Contact;
 import com.retail.ecom.exception.AddressNotFoundByIdException;
 import com.retail.ecom.exception.ContactAlreadyExistException;
+import com.retail.ecom.exception.ContactNotFoundByIdException;
 import com.retail.ecom.repository.AddressRepository;
 import com.retail.ecom.repository.ContactRepository;
 import com.retail.ecom.request_dto.ConatactRequest;
@@ -27,7 +28,8 @@ public class ContactServiceImpl implements ContactService {
 	private ContactRepository contactRepository;
 
 	@Override
-	public ResponseEntity<ResponseStructure<List<ContactResponse>>> addContact(List<ConatactRequest> conatactRequests, int addressId) {
+	public ResponseEntity<ResponseStructure<List<ContactResponse>>> addContact(List<ConatactRequest> conatactRequests, 
+			int addressId) {
 		
 		List<Contact> list = addressRepository.findById(addressId).map(address->{
 			
@@ -42,9 +44,21 @@ public class ContactServiceImpl implements ContactService {
 			return saveContacts;
 				
 		}).orElseThrow(()-> new AddressNotFoundByIdException("Address not found by Id"));
-		return ResponseEntity.ok(new ResponseStructure<List<ContactResponse>>().setData(mapToContactResponses(list)).setMessage("Conatct added").setStatusCode(HttpStatus.OK.value()));
+		return ResponseEntity.ok(new ResponseStructure<List<ContactResponse>>()
+				.setData(mapToContactResponses(list)).setMessage("Conatct added")
+				.setStatusCode(HttpStatus.OK.value()));
 		
 		
+	}
+
+	@Override
+	public ResponseEntity<ResponseStructure<ContactResponse>> updateContact(
+			ConatactRequest conatactRequests, int contactId) {
+		Contact contact2 = contactRepository.findById(contactId).map(contact->{
+			return contactRepository.save(mapToConatct(contact, conatactRequests));
+		}).orElseThrow(()->new ContactNotFoundByIdException("contact not found by Id"));
+		return ResponseEntity.ok(new ResponseStructure<ContactResponse>().setData(mapToConatctResponse(contact2))
+				.setMessage("update contact").setStatusCode(HttpStatus.OK.value()));
 	}
 
 	
@@ -88,5 +102,7 @@ public class ContactServiceImpl implements ContactService {
 		
 	}
 
+
+	
 
 }

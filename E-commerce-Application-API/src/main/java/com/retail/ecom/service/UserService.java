@@ -20,7 +20,7 @@ public interface UserService {
 
 	ResponseEntity<ResponseStructure<UserResponse>> verifyOTP(OtpRequest otpRequest);
 
-	ResponseEntity<ResponseStructure<AuthResponse>> userLogin(AuthRequest authRequest);
+	ResponseEntity<ResponseStructure<AuthResponse>> userLogin(AuthRequest authRequest,String accessToekn,String refreshToken);
 
 	ResponseEntity<SimpleResponseStructure>userLogout(String accessToken, String refreshToken);
 

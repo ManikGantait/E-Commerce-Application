@@ -12,4 +12,6 @@ public interface ContactService {
 
 	ResponseEntity<ResponseStructure<List<ContactResponse>>> addContact(List<ConatactRequest> conatactRequests, int addressId);
 
+	ResponseEntity<ResponseStructure<ContactResponse>> updateContact(ConatactRequest conatactRequests,int contactId);
+
 }
