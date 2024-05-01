@@ -22,6 +22,7 @@ import com.retail.ecom.exception.InvalidUserRoleSpecifiedException;
 import com.retail.ecom.exception.OTPExpiredException;
 import com.retail.ecom.exception.RegistrationSessionExpiredException;
 import com.retail.ecom.exception.UserAlreadyExistByEmailException;
+import com.retail.ecom.exception.UserAlreadyLoginException;
 import com.retail.ecom.exception.UserAlreadyLogoutException;
 
 import lombok.AllArgsConstructor;
@@ -89,6 +90,11 @@ public class ApllicationExceptionHandler extends ResponseEntityExceptionHandler 
 	{
 		return ResponseEntity.badRequest().body(errorStructure(HttpStatus.BAD_REQUEST,"User alredy logout",ex.getMessage()));
 				
+	}
+	@ExceptionHandler
+	public ResponseEntity<ErrorStructure> userAlreadyLogin(UserAlreadyLoginException ex)
+	{
+		return ResponseEntity.badRequest().body(errorStructure(HttpStatus.BAD_REQUEST,"please refresh",ex.getMessage()));
 	}
 
 	
