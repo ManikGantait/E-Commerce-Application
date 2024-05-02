@@ -1,8 +1,11 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 const EditProfile = () => {
   return (
-    <div>EditProfile</div>
+    <div>
+      <Link onClick={()=>window.location.href="/addaddress"} >Add Address</Link>
+    </div>
   )
 }
 

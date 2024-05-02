@@ -162,8 +162,8 @@ public class UserServiceImlp implements UserService {
 		
 		HttpHeaders headers=new HttpHeaders();
 		User user2= userRepository.findByUsername(username).map(user->{
-//			if(accessToken==null && refreshToekn!=null)
-//				throw new UserAlreadyLoginException("user already login");
+			if(accessToken==null && refreshToekn!=null)
+				throw new UserAlreadyLoginException("user already login");
 			generateAccessToken(user, headers);
 			generateRefreshToken(user, headers);
 				

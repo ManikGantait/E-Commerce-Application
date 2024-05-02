@@ -21,6 +21,7 @@ const OTPVerification = () => {
     e.preventDefault();
     console.log(otp);
     const email=sessionStorage.getItem('email');
+    sessionStorage.removeItem('email');
     const OtpData={email:email,otp:otp};
     if(otp)
     try {
