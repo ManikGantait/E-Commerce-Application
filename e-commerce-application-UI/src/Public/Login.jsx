@@ -42,26 +42,22 @@ const Login = () => {
                                               withCredentials:'true'
                                            });
          
-          console.log((await response).status)
           if((await response).status===200)
-          {
-            // setUser((await response).data.data);
-            setUser({
+          {     
+            const userData={
               userId:(await response).data.data.userId,
               username:(await response).data.data.username,
               role:(await response).data.data.role,
               authenticated: true,
-              accessExpiration:(await response).data.data.accessExpiration,
-              refershExpiration:(await response).data.data.refershExpiration,
-          })
-           
-          //  consoZle.log((await response).data.data)
+              accessExpiration:new Date(new Date().getTime()+(await response).data.data.accessExpiration),
+              refreshExpiration:new Date(new Date().getTime()+ (120*1000)),
+          };
+          localStorage.setItem("authResponse",JSON.stringify((userData)));
+          setUser(userData);           
           
            navigate("/");           
             
-          }
-
-         
+          }         
         }
         catch(error){
           console.error("Message:",error);

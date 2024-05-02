@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.retail.ecom.jwt.JwtService;
+import com.retail.ecom.request_dto.AddressRequest;
 import com.retail.ecom.request_dto.AuthRequest;
 import com.retail.ecom.request_dto.OtpRequest;
 import com.retail.ecom.request_dto.UserRequestEntity;
@@ -50,9 +51,9 @@ public class UserController {
 //	}
 	
 	@PostMapping("/login")
-	public ResponseEntity<ResponseStructure<AuthResponse>> userLogin(@RequestBody AuthRequest authRequest)
+	public ResponseEntity<ResponseStructure<AuthResponse>> userLogin(@RequestBody AuthRequest authRequest ,@CookieValue(name = "at",required = false )String accessToken, @CookieValue(name = "rt",required = false)String refreshToken)
 	{
-		return service.userLogin(authRequest);
+		return service.userLogin(authRequest,accessToken,refreshToken);
 	}
 	@PostMapping("/logout")
 	public ResponseEntity<SimpleResponseStructure> userLogout(@CookieValue(name = "at", required = false)String accessToken, @CookieValue(name = "rt",required = false)String refreshToken )
@@ -65,6 +66,7 @@ public class UserController {
 	{
 		return service.refreshLogin(accessToken,refreshToken);
 	}
+	
 	
 	
 	

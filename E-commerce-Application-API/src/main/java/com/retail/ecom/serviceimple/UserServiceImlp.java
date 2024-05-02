@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.Optional;
 import java.util.Random;
 
 import org.checkerframework.checker.units.qual.h;
@@ -37,12 +38,14 @@ import com.retail.ecom.exception.InvalidUserRoleSpecifiedException;
 import com.retail.ecom.exception.OTPExpiredException;
 import com.retail.ecom.exception.RegistrationSessionExpiredException;
 import com.retail.ecom.exception.UserAlreadyExistByEmailException;
+import com.retail.ecom.exception.UserAlreadyLoginException;
 import com.retail.ecom.exception.UserAlreadyLogoutException;
 import com.retail.ecom.jwt.JwtService;
 import com.retail.ecom.mailservice.MailService;
 import com.retail.ecom.repository.AccessTokenRepository;
 import com.retail.ecom.repository.RefreshTokenRepository;
 import com.retail.ecom.repository.UserRepository;
+import com.retail.ecom.request_dto.AddressRequest;
 import com.retail.ecom.request_dto.AuthRequest;
 import com.retail.ecom.request_dto.OtpRequest;
 import com.retail.ecom.request_dto.UserRequestEntity;
@@ -100,6 +103,155 @@ public class UserServiceImlp implements UserService {
 	@Value("${myapp.jwt.refresh.expiration}")
 	private long refreshExpiration;
 
+		
+	
+
+	@Override
+	public ResponseEntity<SimpleResponseStructure> registerUsers(UserRequestEntity userRequestEntity) {
+		
+		if(userRepository.existsByEmail(userRequestEntity.getEmail()))
+			throw new UserAlreadyExistByEmailException("user already exist");
+		
+		User user=mapToChildEntity(userRequestEntity);
+		String otp=generateOTP();
+		otpCache.add(userRequestEntity.getEmail(), otp);
+		userCache.add(userRequestEntity.getEmail(), user);
+		try {
+			sendOTP(user,otp);
+		} catch (MessagingException e) {
+			throw new  InvalidUserEmailSpecifiedException("Invalid Email");			
+		}
+		
+		return ResponseEntity.ok(simpleResponseStructure2.setStatus(HttpStatus.ACCEPTED.value()).setMessage("verify the mail to complite the registration ,"+otp+" OTP  expaires in 1 minute"));
+		
+	}
+
+
+
+
+	@Override
+	public ResponseEntity<ResponseStructure<UserResponse>> verifyOTP(OtpRequest otpRequest) {
+		
+		if(otpCache.get(otpRequest.getEmail())==null) throw new OTPExpiredException("OTP Expired");
+		if(!otpCache.get(otpRequest.getEmail()).equals(otpRequest.getOtp())) throw new InvalidOTPException("OTP Invalid");
+		
+		User user = userCache.get(otpRequest.getEmail());
+		if(user==null) throw new RegistrationSessionExpiredException("Session Expired ");
+		user.setEmailVerified(true);
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(responseStructure.setData(mapToUserResponse(userRepository.save(user)))
+						.setMessage("Successfull")
+						.setStatusCode(HttpStatus.CREATED.value()));
+	}
+
+	@Override
+	public ResponseEntity<ResponseStructure<AuthResponse>> userLogin(AuthRequest authRequest,String accessToken,
+			String refreshToekn) {
+	
+		String username=authRequest.getUsername().split("@gmail.com")[0];
+		System.out.println(username);
+		Authentication authenticate = authenticationManager
+		.authenticate(
+				new UsernamePasswordAuthenticationToken(username, authRequest.getPassword())
+				);
+		if(!authenticate.isAuthenticated())
+			throw new InvalidCredentialsException("username and password is not valid");
+		SecurityContextHolder.getContext().setAuthentication(authenticate);
+		
+		HttpHeaders headers=new HttpHeaders();
+		User user2= userRepository.findByUsername(username).map(user->{
+			if(accessToken==null && refreshToekn!=null)
+				throw new UserAlreadyLoginException("user already login");
+			generateAccessToken(user, headers);
+			generateRefreshToken(user, headers);
+				
+			return user;
+		}).get();
+		 
+		
+		
+		
+		return ResponseEntity.ok()
+		.headers(headers)
+		.body(new ResponseStructure<AuthResponse>().setData(mapToAuthResponse(user2))
+				.setMessage("Authentication Successful")
+				.setStatusCode(HttpStatus.OK.value()));
+		
+		
+	}
+
+	@Override
+	public ResponseEntity<SimpleResponseStructure>userLogout(String accessToken,
+			String refreshToken) {
+		if(accessToken==null&& refreshToken==null)
+			throw new UserAlreadyLogoutException("already logout");
+		refreshTokenRepository.findByToken(refreshToken).ifPresent(rt->{
+			rt.setBlocked(true);
+			System.out.println(rt);
+			refreshTokenRepository.save(rt);
+		});
+				
+		accessTokenRepository.findByToken(accessToken).ifPresent(at->{
+			at.setBlocked(true);
+			System.out.println(at);
+			accessTokenRepository.save(at);
+		});
+				
+		HttpHeaders headers=new HttpHeaders();
+		headers.add(HttpHeaders.SET_COOKIE, invalidCookie("at"));
+		headers.add(HttpHeaders.SET_COOKIE, invalidCookie("rt"));
+		System.err.println("++++++++++++++++++++++");
+		System.out.println(accessToken+"/"+refreshToken);
+		
+		return ResponseEntity.ok()
+				.headers(headers)
+				.body(simpleResponseStructure2.setStatus(HttpStatus.OK.value()).setMessage("Log out "));
+	}
+	
+	
+	
+	@Override
+	public ResponseEntity<ResponseStructure<AuthResponse>> refreshLogin(String accessToken, String refreshToken) {
+		
+		if(accessToken!=null)
+		{
+			accessTokenRepository.findByToken(accessToken).ifPresent(at->{
+				at.setBlocked(true);
+				accessTokenRepository.save(at);
+			});	
+		}
+		if(refreshToken==null)
+			throw new UserAlreadyLogoutException("require Login");
+		
+		Date date=jwtService.getIssueDate(refreshToken);
+		String username=jwtService.getUsername(refreshToken);
+		HttpHeaders headers=new HttpHeaders();
+		return userRepository.findByUsername(username).map(user->
+			{
+					if(date.before(new Date()))
+					{
+						generateRefreshToken(user, headers);
+						refreshTokenRepository.findByToken(refreshToken).ifPresent(rt->{
+							rt.setBlocked(true);
+							refreshTokenRepository.save(rt);
+						});
+					}
+					else
+						headers.add(HttpHeaders.SET_COOKIE, configuratinCookie("rt",refreshToken,refreshExpiration));
+					
+					generateAccessToken(user, headers);
+			return ResponseEntity.ok().headers(headers).body(new ResponseStructure<AuthResponse>()
+																.setStatusCode(HttpStatus.OK.value())
+																.setMessage("Refresh Successfull")
+																.setData(mapToAuthResponse(user)));
+		}).get();	
+		
+	}
+	
+	
+	
 	private <T extends User> T mapToChildEntity(UserRequestEntity userRequestEntity) {
 		UserRole  userRole=userRequestEntity.getUserRole();
 		User user;
@@ -157,148 +309,9 @@ public class UserServiceImlp implements UserService {
 		
 		mailService.sendMailMessage(model);
 	}
+
 	
 	
-
-	@Override
-	public ResponseEntity<SimpleResponseStructure> registerUsers(UserRequestEntity userRequestEntity) {
-		
-		if(userRepository.existsByEmail(userRequestEntity.getEmail()))
-			throw new UserAlreadyExistByEmailException("user already exist");
-		
-		User user=mapToChildEntity(userRequestEntity);
-		String otp=generateOTP();
-		otpCache.add(userRequestEntity.getEmail(), otp);
-		userCache.add(userRequestEntity.getEmail(), user);
-		try {
-			sendOTP(user,otp);
-		} catch (MessagingException e) {
-			throw new  InvalidUserEmailSpecifiedException("Invalid Email");			
-		}
-		
-		return ResponseEntity.ok(simpleResponseStructure2.setStatus(HttpStatus.ACCEPTED.value()).setMessage("verify the mail to complite the registration ,"+otp+" OTP  expaires in 1 minute"));
-		
-	}
-
-
-
-
-	@Override
-	public ResponseEntity<ResponseStructure<UserResponse>> verifyOTP(OtpRequest otpRequest) {
-		
-		if(otpCache.get(otpRequest.getEmail())==null) throw new OTPExpiredException("OTP Expired");
-		if(!otpCache.get(otpRequest.getEmail()).equals(otpRequest.getOtp())) throw new InvalidOTPException("OTP Invalid");
-		
-		User user = userCache.get(otpRequest.getEmail());
-		if(user==null) throw new RegistrationSessionExpiredException("Session Expired ");
-		user.setEmailVerified(true);
-		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		
-		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(responseStructure.setData(mapToUserResponse(userRepository.save(user)))
-						.setMessage("Successfull")
-						.setStatusCode(HttpStatus.CREATED.value()));
-	}
-
-	@Override
-	public ResponseEntity<ResponseStructure<AuthResponse>> userLogin(AuthRequest authRequest) {
-	
-		String username=authRequest.getUsername().split("@gmail.com")[0];
-		System.out.println(username);
-		Authentication authenticate = authenticationManager
-		.authenticate(
-				new UsernamePasswordAuthenticationToken(username, authRequest.getPassword())
-				);
-		if(!authenticate.isAuthenticated())
-			throw new InvalidCredentialsException("username and password is not valid");
-		SecurityContextHolder.getContext().setAuthentication(authenticate);
-		
-		HttpHeaders headers=new HttpHeaders();
-		User user2= userRepository.findByUsername(username).map(user->{
-			generateAccessToken(user, headers);
-			generateRefreshToken(user, headers);
-			return user;
-		}).get();
-		 
-		
-		return ResponseEntity.ok()
-		.headers(headers)
-		.body(new ResponseStructure<AuthResponse>().setData(mapToAuthResponse(user2))
-				.setMessage("Authentication Successful")
-				.setStatusCode(HttpStatus.OK.value()));
-		
-		
-	}
-
-	@Override
-	public ResponseEntity<SimpleResponseStructure>userLogout(String accessToken,
-			String refreshToken) {
-		if(accessToken==null&& refreshToken==null)
-			throw new UserAlreadyLogoutException("already logout");
-		refreshTokenRepository.findByToken(refreshToken).ifPresent(rt->{
-			rt.setBlocked(true);
-			System.out.println(rt);
-			refreshTokenRepository.save(rt);
-		});
-		
-		
-		accessTokenRepository.findByToken(accessToken).ifPresent(at->{
-			at.setBlocked(true);
-			System.out.println(at);
-			accessTokenRepository.save(at);
-		});
-		
-		
-		HttpHeaders headers=new HttpHeaders();
-		headers.add(HttpHeaders.SET_COOKIE, invalidCookie("at"));
-		headers.add(HttpHeaders.SET_COOKIE, invalidCookie("rt"));
-		System.err.println("++++++++++++++++++++++");
-		System.out.println(accessToken+"/"+refreshToken);
-		
-		return ResponseEntity.ok()
-				.headers(headers)
-				.body(simpleResponseStructure2.setStatus(HttpStatus.OK.value()).setMessage("Log out "));
-	}
-	
-	@Override
-	public ResponseEntity<ResponseStructure<AuthResponse>> refreshLogin(String accessToken, String refreshToken) {
-		
-		if(accessToken!=null)
-		{
-			accessTokenRepository.findByToken(accessToken).ifPresent(at->{
-				at.setBlocked(true);
-				accessTokenRepository.save(at);
-			});	
-		}
-		if(refreshToken==null)
-			throw new UserAlreadyLogoutException("require Login");
-		
-		Date date=jwtService.getIssueDate(refreshToken);
-		String username=jwtService.getUsername(refreshToken);
-		HttpHeaders headers=new HttpHeaders();
-		return userRepository.findByUsername(username).map(user->
-			{
-					if(date.before(new Date()))
-					{
-						generateRefreshToken(user, headers);
-						refreshTokenRepository.findByToken(refreshToken).ifPresent(rt->{
-							rt.setBlocked(true);
-							refreshTokenRepository.save(rt);
-						});
-					}
-					else
-						headers.add(HttpHeaders.SET_COOKIE, configuratinCookie("rt",refreshToken,refreshExpiration));
-					
-					generateAccessToken(user, headers);
-			return ResponseEntity.ok().headers(headers).body(new ResponseStructure<AuthResponse>()
-																.setStatusCode(HttpStatus.OK.value())
-																.setMessage("Refresh Successfull")
-																.setData(mapToAuthResponse(user)));
-		}).get();
-		
-		
-		
-	}
 
 
 	
@@ -369,9 +382,5 @@ public class UserServiceImlp implements UserService {
 	}
 
 	
-	
-	
-	
-
 
 }

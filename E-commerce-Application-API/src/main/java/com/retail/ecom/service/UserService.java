@@ -3,6 +3,7 @@ package com.retail.ecom.service;
 import org.springframework.http.ResponseEntity;
 
 import com.retail.ecom.entity.User;
+import com.retail.ecom.request_dto.AddressRequest;
 import com.retail.ecom.request_dto.AuthRequest;
 import com.retail.ecom.request_dto.OtpRequest;
 import com.retail.ecom.request_dto.UserRequestEntity;
@@ -19,10 +20,12 @@ public interface UserService {
 
 	ResponseEntity<ResponseStructure<UserResponse>> verifyOTP(OtpRequest otpRequest);
 
-	ResponseEntity<ResponseStructure<AuthResponse>> userLogin(AuthRequest authRequest);
+	ResponseEntity<ResponseStructure<AuthResponse>> userLogin(AuthRequest authRequest,String accessToekn,String refreshToken);
 
 	ResponseEntity<SimpleResponseStructure>userLogout(String accessToken, String refreshToken);
 
 	ResponseEntity<ResponseStructure<AuthResponse>> refreshLogin(String accessToken, String refreshToken);
+
+	
 
 }

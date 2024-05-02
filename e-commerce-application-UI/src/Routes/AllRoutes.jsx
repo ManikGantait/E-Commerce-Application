@@ -13,6 +13,8 @@ import Login from '../Public/Login';
 import Register from '../Public/Register';
 import OTPVerification from '../Public/OTPVerification';
 import { useAuth } from '../auth/AuthProvider';
+import ContactFrom from '../Private/Common/ContactFrom';
+import ManageAddress from '../Private/Common/ManageAddress';
 
 const AllRoutes = () => {
 
@@ -22,11 +24,13 @@ const AllRoutes = () => {
 
 if(authenticated)
 {
-    // Private Routes
+    // Common Private Routes
 
     routes.push(
-        <Route key={'/addaddress'} path='/addaddress' element={ <AddAddress />}/>,
-        <Route key={'/addaddress'}path='/editprofile' element={ <EditProfile />}/>
+        
+        <Route key={'/editprofile'}path='/editprofile' element={ <EditProfile />}/>,
+       
+
     )
 
     if(role==="CUSTOMER") 
@@ -36,6 +40,7 @@ if(authenticated)
             <Route key={'/wishlist'} path='/wishlist' element={ <Wishlist />}/>,
             <Route key={'/explore'} path='/explore' element={ <Explore />}/>,
             <Route key={'/cart'} path='/cart' element={ <Cart />}/>,
+            <Route key={'/editprofile'}path='/editprofile' element={ <EditProfile />}/>
         ) 
     }
     else if(role==="SELLER")
@@ -58,6 +63,11 @@ else{
         <Route key={'/seller/register'} path='/seller/register' element={ <Register role={"SELLER"} />}/>, 
         <Route key={'/explore'} path='/explore' element={ <Explore />}/>, 
         <Route key={'/otpverification'} path='/otpverification' element={ <OTPVerification />}/>,           
+        <Route key={'/addaddress'} path='/addaddress' element={ <AddAddress />}/>,
+        <Route key={'/addcontact'} path='/addcontact/:addressId' element={ <ContactFrom />}/>,
+        <Route key={'/manageAddress'}path='/manageaddress' element={ <ManageAddress />}/>,
+        // <Route key={'/refreshAuth'}path='/refreshAuth' element={ <RefreshAuth />}/>
+
         
     ) ; 
 
