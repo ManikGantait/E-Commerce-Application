@@ -3,6 +3,8 @@ package com.retail.ecom.entity;
 import com.retail.ecom.enums.Priority;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,6 +22,7 @@ public class Contact {
 	private String name;
 	private long phoneNumber;
 	private String email;
+	@Enumerated(EnumType.STRING)
 	private Priority priority;
 	
 
