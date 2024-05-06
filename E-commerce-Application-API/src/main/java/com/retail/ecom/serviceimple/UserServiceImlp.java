@@ -150,6 +150,9 @@ public class UserServiceImlp implements UserService {
 	public ResponseEntity<ResponseStructure<AuthResponse>> userLogin(AuthRequest authRequest,String accessToken,
 			String refreshToekn) {
 	
+		
+		if(accessToken!=null && refreshToekn!=null||accessToken==null&&refreshToekn!=null)
+			throw new UserAlreadyLoginException("user already login send refresh request");
 		String username=authRequest.getUsername().split("@gmail.com")[0];
 		System.out.println(username);
 		Authentication authenticate = authenticationManager
@@ -162,8 +165,7 @@ public class UserServiceImlp implements UserService {
 		
 		HttpHeaders headers=new HttpHeaders();
 		User user2= userRepository.findByUsername(username).map(user->{
-			if(accessToken==null && refreshToekn!=null)
-				throw new UserAlreadyLoginException("user already login");
+			
 			generateAccessToken(user, headers);
 			generateRefreshToken(user, headers);
 				

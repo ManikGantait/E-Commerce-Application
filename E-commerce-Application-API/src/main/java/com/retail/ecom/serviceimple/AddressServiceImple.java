@@ -50,7 +50,7 @@ public class AddressServiceImple implements AddressService {
 	@Override
 	public ResponseEntity<ResponseStructure<AddressResponse>> addAddress(AddressRequest addressRequest, String refreshToken) {
 		
-		String username=jwtService.getUsername(refreshToken);
+		String username=SecurityContextHolder.getContext().getAuthentication().getName();
 		
 		Optional<Address> optional = userRepository.findByUsername(username).map(user->{
 			System.out.println(username);
@@ -84,7 +84,8 @@ public class AddressServiceImple implements AddressService {
 	public ResponseEntity<ResponseStructure<List<AddressResponse>>> findAddressByUser(String accessToken) {
 		
 		 
-		String username=jwtService.getUsername(accessToken);
+		String username = SecurityContextHolder.getContext().getAuthentication().getName();
+//		String username=jwtService.getUsername(accessToken);
 		AtomicReference<List<Address>> addresses = new AtomicReference<>(null);
 		
 		AtomicReference<List<Address>> atomicReference = userRepository.findByUsername(username).map(user->{
