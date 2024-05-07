@@ -20,9 +20,9 @@ import com.retail.ecom.utility.SimpleResponseStructure;
 import lombok.AllArgsConstructor;
 
 @RestController
-@RequestMapping("api/v1")
 @AllArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173/",allowCredentials = "true" )
+@RequestMapping("/api/v1")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true" )
 public class ContactController {
 	
 	private ContactService contactService;

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,8 +27,8 @@ import lombok.AllArgsConstructor;
 
 @RestController
 @AllArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173/",allowCredentials = "true" )
 @RequestMapping("/api/v1")
+@CrossOrigin(origins ={"http://localhost:5173"}, allowCredentials = "true" )
 public class UserController {
 	
 	private UserService service;
@@ -44,11 +45,11 @@ public class UserController {
 	{
 		return service.verifyOTP(otpRequest);
 	}
-//	@GetMapping("/test")
-//	public String getToken()
-//	{
-//		return jwtService.generateRefreshToken();
-//	}
+	@GetMapping("/test")
+	public String getToken()
+	{
+		return "H";
+	}
 	
 	@PostMapping("/login")
 	public ResponseEntity<ResponseStructure<AuthResponse>> userLogin(@RequestBody AuthRequest authRequest ,@CookieValue(name = "at",required = false )String accessToken, @CookieValue(name = "rt",required = false)String refreshToken)
@@ -58,7 +59,6 @@ public class UserController {
 	@PostMapping("/logout")
 	public ResponseEntity<SimpleResponseStructure> userLogout(@CookieValue(name = "at", required = false)String accessToken, @CookieValue(name = "rt",required = false)String refreshToken )
 	{
-		System.out.println(accessToken+" |"+refreshToken);
 		return service.userLogout(accessToken,refreshToken);
 	}
 	@PostMapping("/refreshlogin")

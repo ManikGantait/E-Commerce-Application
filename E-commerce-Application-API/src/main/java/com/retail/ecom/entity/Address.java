@@ -5,6 +5,8 @@ import java.util.List;
 import com.retail.ecom.enums.AddressType;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -25,6 +27,7 @@ public class Address {
 	private String city;
 	private String state;
 	private int pincode;
+	@Enumerated(EnumType.STRING)
 	private AddressType addressType;
 	
 	@OneToMany(fetch =  FetchType.EAGER)
