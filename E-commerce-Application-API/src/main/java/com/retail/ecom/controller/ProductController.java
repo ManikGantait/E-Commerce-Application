@@ -55,13 +55,14 @@ public class ProductController {
 	}
 	
 	@GetMapping("/filter")
-	public ResponseEntity<ResponseStructure<List<Product>>> getfilterProduct(SearchFilter searchFilter)
+	public ResponseEntity<ResponseStructure<List<ProductResponse>>> getfilterProduct(SearchFilter searchFilter,int page,String orderBy, String sortBy)
 	{
-		System.out.println(searchFilter);
-		return productService.findAll(searchFilter);
-//		System.out.println(new ProductSpecifications(searchFilter));
-//		return ResponseEntity.ok(new ProductSpecifications(searchFilter));
+		return productService.findAll(searchFilter,page,orderBy,sortBy);
 	}
-	
+	@GetMapping("/products")
+	public ResponseEntity<ResponseStructure<List<ProductResponse>>> searchProduct(@RequestParam String searchText)
+	{
+		return productService.searchProduct(searchText);
+	}
 
 }

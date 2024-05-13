@@ -17,6 +17,8 @@ public interface ProductService {
 	ResponseEntity<ResponseStructure<ProductResponse>> updateProduct(ProductRequest productRequest,int productId);
 
 	ResponseEntity<ResponseStructure<ProductResponse>> findProductById(int productId);
-	ResponseEntity<ResponseStructure<List<Product>>> findAll(SearchFilter searchFilter);
+	ResponseEntity<ResponseStructure<List<ProductResponse>>> findAll(SearchFilter searchFilter,int page,String orderBy,String sortBy);
+
+	ResponseEntity<ResponseStructure<List<ProductResponse>>> searchProduct(String serachText);
 
 }

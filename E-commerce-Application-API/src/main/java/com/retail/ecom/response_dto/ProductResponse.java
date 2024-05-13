@@ -22,6 +22,7 @@ public class ProductResponse {
 	private int productQuantity;
 	private AvailabilityStatus availabilityStatus; 
 	private ProductCatagory productCatagory;
-	private List<Image> images;
+	private String coverImages;
+	private List<String> normalImage;
 
 }
