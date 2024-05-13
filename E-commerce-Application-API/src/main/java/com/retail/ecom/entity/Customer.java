@@ -15,5 +15,7 @@ public class Customer extends User{
 	
 	@OneToMany
 	private List<Address> addresses;
+	@OneToMany
+	private List<CartProduct> cartProducts;
 
 }

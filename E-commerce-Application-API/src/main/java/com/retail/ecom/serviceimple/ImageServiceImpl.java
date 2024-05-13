@@ -32,6 +32,7 @@ public class ImageServiceImpl implements ImageService{
 	@Override
 	public ResponseEntity<SimpleResponseStructure> addImage(int prodctId, String imageType, MultipartFile image) throws IOException {
 		
+		
 		if(!productRepository.existsById(prodctId))
 			throw new ProductNotFoundByIdException("Product not found By Id");
 

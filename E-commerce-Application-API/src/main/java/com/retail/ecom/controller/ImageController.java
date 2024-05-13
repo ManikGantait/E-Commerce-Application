@@ -1,6 +1,7 @@
 package com.retail.ecom.controller;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.retail.ecom.entity.Image;
+import com.retail.ecom.enums.ImageType;
+import com.retail.ecom.repository.ImageRepository;
 import com.retail.ecom.service.ImageService;
 import com.retail.ecom.utility.ResponseStructure;
 import com.retail.ecom.utility.SimpleResponseStructure;
@@ -26,6 +29,7 @@ import lombok.AllArgsConstructor;
 public class ImageController {
 	
 	private ImageService imageService;
+	private ImageRepository imageRepository;
 	
 	
 	@PreAuthorize("hasAuthority('SELLER')")
