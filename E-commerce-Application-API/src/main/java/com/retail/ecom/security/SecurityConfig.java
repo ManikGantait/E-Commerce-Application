@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -65,6 +66,7 @@ public class SecurityConfig  {
 	}
 	
 	@Bean
+	@Order(1)
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception
 	{	
 		/**
@@ -73,19 +75,44 @@ public class SecurityConfig  {
 		 * if request url is not specified url the users should be authenticated.
 		 * 
 		 */
-		http.cors().configurationSource(corsConfigurationSource());
 		return http.csrf(csrf->csrf.disable())
-				
-				.authorizeHttpRequests((auth)->{
-					auth.requestMatchers("/api/v1/register","/api/v1/login","/api/v1/verify-email","/api/v1/refreshlogin").permitAll();
-					auth.anyRequest().authenticated();
-				})
+				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+				.securityMatchers(matcher ->matcher.requestMatchers("/api/v1/register","/api/v1/login","/api/v1/verify-email"))
 				.sessionManagement(management->{
 					management.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 				})
-				.authenticationProvider(authenticationProvider())
-				.addFilterBefore(new JwtFilter(accessTokenRepository, refreshTokenRepository, jwtService), UsernamePasswordAuthenticationFilter.class).build();
+				.build();
 				
+	}
+	@Bean
+	@Order(2)
+	SecurityFilterChain refreshFilterChain(HttpSecurity http) throws Exception
+	{
+        
+		return http.csrf(csrf->csrf.disable())
+		.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+		.securityMatchers(matcher->matcher.requestMatchers("/api/v1/refreshlogin"))
+		.authorizeHttpRequests(auth->auth.anyRequest().authenticated())
+		
+		.sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+		.addFilterBefore(new RefreshFilter(refreshTokenRepository,jwtService), UsernamePasswordAuthenticationFilter.class)
+		.authenticationProvider(authenticationProvider())
+		.build();
+	}
+	@Bean
+	@Order(3)
+	SecurityFilterChain privateFilter(HttpSecurity http) throws Exception
+	{
+		return http.csrf(csrf->csrf.disable())
+				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+				.authorizeHttpRequests(auth->{
+					auth.anyRequest().authenticated();
+				})
+				.sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.addFilterBefore(new JwtFilter(accessTokenRepository, refreshTokenRepository, jwtService), UsernamePasswordAuthenticationFilter.class)
+				.authenticationProvider(authenticationProvider())
+				.build();
+		
 	}
 	
 	@Bean
@@ -94,10 +121,10 @@ public class SecurityConfig  {
 		return configuration.getAuthenticationManager();
 	}
 
-	 @Bean
-	  public CorsConfigurationSource corsConfigurationSource() {
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
 	        CorsConfiguration configuration = new CorsConfiguration();
-	        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Replace with allowed origins
+	        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); 
 	        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
 	        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
 	        configuration.setAllowCredentials(true); // Allow cookies for credentials
@@ -105,6 +132,6 @@ public class SecurityConfig  {
 	        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 	        source.registerCorsConfiguration("/**", configuration);
 	        return source;
-	    }
+	}
 
 }
